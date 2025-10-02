@@ -1,7 +1,7 @@
 library(dplyr)
 library(lubridate)
 library(ggplot2)
-
+library(patchwork)
 dataDir <- "/Users/hkropp/Library/CloudStorage/GoogleDrive-hkropp@hamilton.edu/My Drive/research/projects/dendrometer/09_26_2025"
 files <- list.files(dataDir)
 startDay <- 256
@@ -13,9 +13,11 @@ weather$doy <- yday(weather$date)
 weather$hour <- hour(weather$date)
 hourlyWeather <- weather %>%
   group_by(doy, hour) %>%
-  summarize(PRCP = sum(V3))
+  summarize(PRCP = sum(V3))%>%
+  filter(doy > startDay & doy < 270)
 hourlyWeather$date <- as.Date(hourlyWeather$doy-1, origin="2025-01-01")
 hourlyWeather$datetime <- ymd_hm(paste(hourlyWeather$date,hourlyWeather$hour,":00"))
+
 ######## sensor 1 ######
 s1 <- read.table(paste0(dataDir,"/",files[1]),header=FALSE, sep=";")
 s1$date <- ymd_hm(s1$V2)
@@ -33,10 +35,34 @@ hourData <- hourData %>%
 hourData$date <- as.Date(hourData$doy-1, origin="2025-01-01")
 hourData$datetime <- ymd_hm(paste(hourData$date,hourData$hour,":00"))
 
-ggplot(hourData, aes(datetime,WT))+
+hourFacet <- data.frame(datetime=c(hourData$datetime, hourData$datetime, hourlyWeather$datetime),
+                        data=c(hourData$WT, hourData$Temp, hourlyWeather$PRCP),
+                        type=c(rep("delta T", nrow(hourData)),
+                               rep("Temp", nrow(hourData)),
+                               rep("Precip", nrow(hourlyWeather))))
+
+dendro <- ggplot(hourData, aes(datetime,WT))+
   geom_line()+
   labs(title = paste("sensor",files[1]))+
   scale_x_datetime(date_breaks= "1 day")
+
+temp <- ggplot(hourData, aes(datetime,Temp))+
+  geom_line()+
+  labs(title = paste("sensor",files[1]))+
+  scale_x_datetime(date_breaks= "1 day")
+precip <- ggplot(hourlyWeather, aes(datetime,PRCP))+
+  geom_col()+
+  labs(title = paste("sensor",files[1]))+
+  scale_x_datetime(date_breaks= "1 day")
+
+dendro / temp / precip
+
+mt <- ggplot(hourFacet, aes(datetime,data, color=type))+
+  geom_line()+
+  labs(title = paste("sensor",files[1]))+
+  scale_x_datetime(date_breaks= "1 day")
+
+mt+facet_grid(vars(type), scales="free")
 
 
 ######## sensor 2 ######
