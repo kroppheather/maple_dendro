@@ -2,8 +2,9 @@ library(dplyr)
 library(lubridate)
 library(ggplot2)
 
-dataDir <- "/Users/hkropp/Library/CloudStorage/GoogleDrive-hkropp@hamilton.edu/My Drive/research/projects/dendrometer"
+dataDir <- "/Users/hkropp/Library/CloudStorage/GoogleDrive-hkropp@hamilton.edu/My Drive/research/projects/dendrometer/09_26_2025"
 files <- list.files(dataDir)
+startDay <- 256
 ######## sensor 1 ######
 s1 <- read.table(paste0(dataDir,"/",files[1]),header=FALSE, sep=";")
 s1$date <- ymd_hm(s1$V2)
@@ -16,11 +17,14 @@ hourData <- s1 %>%
   summarise(WT = mean(V7))
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
+hourData$date <- as.Date(hourData$doy-1, origin="2025-01-01")
+hourData$datetime <- ymd_hm(paste(hourData$date,hourData$hour,":00"))
 
-ggplot(hourData, aes(DD,WT))+
+ggplot(hourData, aes(datetime,WT))+
   geom_line()+
-  labs(title = paste("sensor",files[1]))
+  labs(title = paste("sensor",files[1]))+
+  scale_x_datetime(date_breaks= "1 day")
 
 
 ######## sensor 2 ######
@@ -35,7 +39,7 @@ hourData <- s1 %>%
   summarise(WT = mean(V7))
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
@@ -53,7 +57,7 @@ hourData <- s1 %>%
   summarise(WT = mean(V7))
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
@@ -71,7 +75,7 @@ hourData <- s1 %>%
   summarise(WT = mean(V7))
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
@@ -90,7 +94,7 @@ hourData <- s1 %>%
 
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
@@ -109,7 +113,7 @@ hourData <- s1 %>%
 
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
@@ -128,7 +132,7 @@ hourData <- s1 %>%
 
 hourData$DD <- (hourData$doy-1) + (hourData$hour/24)
 hourData <- hourData %>%
-  filter(DD>=244.6667)  
+  filter(DD>=startDay)  
 
 ggplot(hourData, aes(DD,WT))+
   geom_line()+
