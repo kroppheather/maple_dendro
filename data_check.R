@@ -66,3 +66,6 @@ for(i in 1:7){
     print(panels)
   dev.off()
 }
+
+
+
